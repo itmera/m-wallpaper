@@ -98,7 +98,7 @@ onUnmounted(() => {
       @click="currentImage = -1"
     >
       <img
-        :src="imagesList[currentImage].largeurl"
+        :src="imagesList[currentImage].largeurl.replace('http:', '')"
         alt=""
         class="h-full m-auto"
       />
@@ -134,7 +134,10 @@ onUnmounted(() => {
           class="flex justify-between items-center gap-2 px-1 md:px-2 bg-gray-200 rounded-xl"
           @click="changeType(t.id)"
         >
-          <img :src="t.icon" class="w-8 h-8 rounded-l-xl" />
+          <img
+            :src="t.icon.replace('http:', '')"
+            class="w-8 h-8 rounded-l-xl"
+          />
           <p class="mr-2 leading-6 py-1">{{ t.name }}</p>
         </div>
       </div>
@@ -150,7 +153,7 @@ onUnmounted(() => {
         :key="i"
       >
         <div class="relative" @click="currentImage = i">
-          <img :src="img.smallurl" class="rounded-t-xl" />
+          <img :src="img.smallurl.replace('http:', '')" class="rounded-t-xl" />
         </div>
 
         <div class="flex w-full p-2 justify-evenly items-center h-10 gap-5">
