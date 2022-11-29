@@ -28,6 +28,7 @@ const API_URL = "https://app4.i4.cn";
 const p = ref(1);
 const remd = ref(1);
 const currentType = ref(0);
+const leftTabShow = ref(false);
 
 const currentImage = ref(-1);
 
@@ -51,12 +52,19 @@ const getImages = async (type: number = 0, p: number = 0, remd: number = 1) => {
   }
 };
 
-const changeType = (n: number = 0) => (
-  (currentType.value = n), (remd.value = 4), (p.value = 1)
-);
-const changeRemd = (n: number = 0) => (
-  (remd.value = n), (currentType.value = 0), (p.value = 1)
-);
+const changeType = (n: number = 0) => {
+  currentType.value = n;
+  remd.value = 4;
+  p.value = 1;
+  leftTabShow.value = false;
+};
+
+const changeRemd = (n: number = 0) => {
+  currentType.value = 0;
+  remd.value = n;
+  p.value = 1;
+  leftTabShow.value = false;
+};
 
 watchEffect(async () => {
   await getImages(currentType.value, p.value, remd.value);
@@ -71,7 +79,7 @@ const debounce = () => {
 
   timer = setTimeout(() => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (scrollTop + clientHeight + 200 > scrollHeight) {
+    if (scrollTop + clientHeight + 100 > scrollHeight) {
       if (imagesList.value.length % 32 == 0) {
         p.value++;
       }
@@ -82,10 +90,10 @@ onMounted(async () => {
   // 获取分类
   await getTypeList();
   // 触底加载
-  document.getElementById("img-list")?.addEventListener("scroll", debounce);
+  document.addEventListener("scroll", debounce);
 });
 onUnmounted(() => {
-  document.getElementById("img-list")?.removeEventListener("scroll", debounce);
+  document.removeEventListener("scroll", debounce);
 });
 </script>
 
@@ -93,19 +101,54 @@ onUnmounted(() => {
   <div class="bg-gradient-to-r from-sky-400 to-indigo-500">
     <!-- 大图 -->
     <div
-      class="fixed inset-0 left-32 bg-black opacity-95 z-10 overflow-hidden"
+      class="fixed inset-0 md:left-32 bg-black/95 z-20 overflow-x-auto"
       v-if="currentImage >= 0"
-      @click="currentImage = -1"
     >
       <img
-        :src="imagesList[currentImage].largeurl.replace('http:', '')"
+        :src="imagesList[currentImage].largeurl.replace('http', 'https')"
         alt=""
-        class="h-full m-auto"
+        class="object-none object-center h-full m-auto cursor-zoom-in"
       />
+      <button
+        class="fixed right-2 top-2 text-gray-100 w-7 h-7 p-1 rounded-full bg-black/70"
+        @click="currentImage = -1"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="w-5 h-5"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </button>
     </div>
     <!-- 左侧列表 -->
+    <button
+      class="fixed left-0 top-0 flex z-10 bg-red-500 text-gray-300 p-2 rounded-b-full"
+      @click="leftTabShow = true"
+      :class="leftTabShow ? 'hidden' : ['block', 'md:hidden']"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        class="w-6 h-6"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M2.25 4.5A.75.75 0 013 3.75h14.25a.75.75 0 010 1.5H3a.75.75 0 01-.75-.75zm0 4.5A.75.75 0 013 8.25h9.75a.75.75 0 010 1.5H3A.75.75 0 012.25 9zm15-.75A.75.75 0 0118 9v10.19l2.47-2.47a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0l-3.75-3.75a.75.75 0 111.06-1.06l2.47 2.47V9a.75.75 0 01.75-.75zm-15 5.25a.75.75 0 01.75-.75h9.75a.75.75 0 010 1.5H3a.75.75 0 01-.75-.75z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
     <div
-      class="fixed w-32 inset-y-0 left-0 bg-slate-100 text-gray-600 overflow-auto"
+      class="fixed md:w-32 inset-y-0 left-0 bg-slate-100 text-gray-600 overflow-auto z-10"
+      :class="leftTabShow ? 'block' : ['hidden', 'md:block']"
     >
       <div class="p-2 flex flex-col justify-center items-center gap-2">
         <button
@@ -128,23 +171,20 @@ onUnmounted(() => {
         </button>
       </div>
       <div class="p-2 w-full flex flex-col justify-center items-center gap-2">
-        <div
+        <button
           v-for="(t, i) in typeList"
           :key="i"
-          class="flex justify-between items-center gap-2 px-1 md:px-2 bg-gray-200 rounded-xl"
+          class="flex justify-between items-center gap-2 px-2 bg-gray-200 rounded-xl"
           @click="changeType(t.id)"
         >
-          <img
-            :src="t.icon.replace('http:', '')"
-            class="w-8 h-8 rounded-l-xl"
-          />
+          <img :src="t.icon" class="w-8 h-8 rounded-l-xl" />
           <p class="mr-2 leading-6 py-1">{{ t.name }}</p>
-        </div>
+        </button>
       </div>
     </div>
     <!-- 右侧图片 -->
     <div
-      class="flex-1 h-screen grid md:grid-cols-3 lg:grid-cols-6 ml-32 p-4 gap-5 overflow-scroll"
+      class="flex-1 grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-6 p-2 md:ml-32 gap-5"
       id="img-list"
     >
       <div
@@ -152,13 +192,15 @@ onUnmounted(() => {
         v-for="(img, i) in imagesList"
         :key="i"
       >
-        <div class="relative" @click="currentImage = i">
-          <img :src="img.smallurl.replace('http:', '')" class="rounded-t-xl" />
-        </div>
+        <img
+          :src="img.smallurl"
+          class="rounded-t-xl w-full"
+          @click="currentImage = i"
+        />
 
-        <div class="flex w-full p-2 justify-evenly items-center h-10 gap-5">
+        <div class="flex w-full py-2 justify-evenly items-center h-10 gap-5">
           <p class="leading-6 text-gray-400 text-left">
-            {{ img.down == "0" ? "" : img.down }}
+            {{ (parseFloat(img.size) / 1024 / 1024).toFixed(2) }}M
           </p>
           <a
             class="bg-lime-200 rounded-2xl py-1 px-4 text-sm"
@@ -170,7 +212,7 @@ onUnmounted(() => {
         </div>
         <!-- 徽标 -->
         <p
-          class="absolute left-2 top-2 p-1 text-xs text-white bg-red-600/50 rounded-full"
+          class="absolute left-2 top-2 px-2 text-xs leading-5 text-white bg-red-600/50 rounded-full"
         >
           {{ i }}
         </p>

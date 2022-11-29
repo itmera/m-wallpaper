@@ -14,7 +14,7 @@ echo > .nojekyll
 
 echo "# m-wallpaper" > README.md
 # 如果你要部署到自定义域名
-# echo 'www.example.com' > CNAME
+# echo 'mw.hnwali.com' > CNAME
 
 git init
 git checkout -B main
