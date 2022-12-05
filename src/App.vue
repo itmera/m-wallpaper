@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect, onMounted, onUnmounted } from "vue";
-import type { Ref } from "vue";
+import { ref, watchEffect, onMounted, onUnmounted, watch } from "vue";
 
 type tList = {
   id: number;
@@ -20,17 +19,18 @@ type imgList = {
   smallurl: string;
   width: string;
 };
-const typeList: Ref<tList[]> = ref([]);
+const typeList = ref<tList[]>([]);
 
-const imagesList: Ref<imgList[]> = ref([]);
+const imagesList = ref<imgList[]>([]);
 const API_URL = "https://app4.i4.cn";
 
 const p = ref(1);
 const remd = ref(1);
-const currentType = ref(0);
+const typeId = ref(0);
 const leftTabShow = ref(false);
 
-const currentImage = ref(-1);
+const currentImage = ref<imgList | null>(null);
+const currentIndex = ref(0);
 
 const getTypeList = async () => {
   const url = `${API_URL}/getWallpaperTypeList.xhtml`;
@@ -52,22 +52,17 @@ const getImages = async (type: number = 0, p: number = 0, remd: number = 1) => {
   }
 };
 
-const changeType = (n: number = 0) => {
-  currentType.value = n;
-  remd.value = 4;
+watch(currentIndex, (newIndex) => {
+  currentImage.value = imagesList.value[newIndex];
+});
+watch([remd, typeId], () => {
   p.value = 1;
   leftTabShow.value = false;
-};
-
-const changeRemd = (n: number = 0) => {
-  currentType.value = 0;
-  remd.value = n;
-  p.value = 1;
-  leftTabShow.value = false;
-};
+  currentImage.value = null;
+});
 
 watchEffect(async () => {
-  await getImages(currentType.value, p.value, remd.value);
+  await getImages(typeId.value, p.value, remd.value);
 });
 
 let timer: any = undefined;
@@ -101,23 +96,64 @@ onUnmounted(() => {
   <div class="bg-gradient-to-r from-sky-400 to-indigo-500">
     <!-- 大图 -->
     <div
-      class="fixed inset-0 md:left-32 bg-black/95 z-20 overflow-x-auto"
-      v-if="currentImage >= 0"
+      class="fixed inset-0 md:left-32 bg-black z-20 overflow-x-auto flex justify-center items-center"
+      v-if="currentImage"
     >
-      <img
-        :src="imagesList[currentImage].largeurl.replace('http', 'https')"
-        alt=""
-        class="object-none object-center h-full m-auto cursor-zoom-in"
-      />
+      <div class="relative h-full text-slate-300">
+        <img
+          :src="currentImage.largeurl"
+          alt=""
+          class="h-full object-scale-down object-center touch-pinch-zoom cursor-zoom-in"
+        />
+        <!-- 左右切换 -->
+        <button
+          class="absolute left-0 top-1/2 p-1 bg-slate-600/20 rounded-full"
+          @click="currentIndex--"
+          v-if="currentIndex > 0"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-10 h-10"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M11.03 3.97a.75.75 0 010 1.06l-6.22 6.22H21a.75.75 0 010 1.5H4.81l6.22 6.22a.75.75 0 11-1.06 1.06l-7.5-7.5a.75.75 0 010-1.06l7.5-7.5a.75.75 0 011.06 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+
+        <button
+          class="absolute right-0 top-1/2 p-1 rounded-full bg-slate-600/20"
+          v-if="currentIndex < imagesList.length - 1"
+          @click="currentIndex++"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-10 h-10"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12.97 3.97a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 11-1.06-1.06l6.22-6.22H3a.75.75 0 010-1.5h16.19l-6.22-6.22a.75.75 0 010-1.06z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+
       <button
-        class="fixed right-2 top-2 text-gray-100 w-7 h-7 p-1 rounded-full bg-black/70"
-        @click="currentImage = -1"
+        class="fixed right-3 top-3 text-white p-1 rounded-full bg-red-500"
+        @click="currentImage = null"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          class="w-5 h-5"
+          class="w-6 h-6"
         >
           <path
             fill-rule="evenodd"
@@ -129,7 +165,7 @@ onUnmounted(() => {
     </div>
     <!-- 左侧列表 -->
     <button
-      class="fixed left-0 top-0 flex z-10 bg-red-500 text-gray-300 p-2 rounded-b-full"
+      class="fixed left-2 top-0 flex z-10 bg-red-500 text-gray-300 p-2 rounded-b-full"
       @click="leftTabShow = true"
       :class="leftTabShow ? 'hidden' : ['block', 'md:hidden']"
     >
@@ -153,19 +189,19 @@ onUnmounted(() => {
       <div class="p-2 flex flex-col justify-center items-center gap-2">
         <button
           class="bg-orange-200 text-lg py-1 px-6 rounded-lg"
-          @click="changeRemd(3)"
+          @click="(remd = 3), (typeId = 0)"
         >
           精选
         </button>
         <button
           class="bg-red-200 text-lg py-1 px-6 rounded-lg"
-          @click="changeRemd(1)"
+          @click="(remd = 1), (typeId = 0)"
         >
           最新
         </button>
         <button
           class="bg-purple-200 text-lg py-1 px-6 rounded-lg"
-          @click="changeRemd(21)"
+          @click="(remd = 21), (typeId = 0)"
         >
           排行
         </button>
@@ -175,7 +211,7 @@ onUnmounted(() => {
           v-for="(t, i) in typeList"
           :key="i"
           class="flex justify-between items-center gap-2 px-2 bg-gray-200 rounded-xl"
-          @click="changeType(t.id)"
+          @click="(remd = 4), (typeId = t.id)"
         >
           <img :src="t.icon" class="w-8 h-8 rounded-l-xl" />
           <p class="mr-2 leading-6 py-1">{{ t.name }}</p>
@@ -195,26 +231,26 @@ onUnmounted(() => {
         <img
           :src="img.smallurl"
           class="rounded-t-xl w-full"
-          @click="currentImage = i"
+          @click="currentIndex = i"
         />
 
-        <div class="flex w-full py-2 justify-evenly items-center h-10 gap-5">
+        <div class="flex w-full p-2 justify-between items-center h-10 gap-5">
           <p class="leading-6 text-gray-400 text-left">
             {{ (parseFloat(img.size) / 1024 / 1024).toFixed(2) }}M
           </p>
           <a
             class="bg-lime-200 rounded-2xl py-1 px-4 text-sm"
-            :href="img.largeurl"
+            :href="img.largeurl.replace('http', 'https')"
             target="_blank"
           >
-            下载
+            下载此壁纸
           </a>
         </div>
         <!-- 徽标 -->
         <p
           class="absolute left-2 top-2 px-2 text-xs leading-5 text-white bg-red-600/50 rounded-full"
         >
-          {{ i }}
+          {{ i + 1 }}
         </p>
       </div>
     </div>
