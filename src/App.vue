@@ -22,7 +22,7 @@ type imgList = {
 const typeList = ref<tList[]>([]);
 
 const imagesList = ref<imgList[]>([]);
-const API_URL = "/app4";
+const API_URL = "https://app4.i4.cn";
 
 const p = ref(1);
 const remd = ref(1);
@@ -213,7 +213,7 @@ onUnmounted(() => {
           class="flex justify-between items-center gap-2 px-2 bg-gray-200 rounded-xl"
           @click="(remd = 4), (typeId = t.id)"
         >
-          <img :src="t.icon" class="w-8 h-8 rounded-l-xl" />
+          <img :src="t.icon.replace('http://d.paper.i4.cn','/app4')" class="w-8 h-8 rounded-l-xl" />
           <p class="mr-2 leading-6 py-1">{{ t.name }}</p>
         </button>
       </div>
@@ -229,7 +229,7 @@ onUnmounted(() => {
         :key="i"
       >
         <img
-          :src="img.smallurl"
+          :src="img.smallurl.replace('http://d.paper.i4.cn','/app4')"
           class="rounded-t-xl w-full"
           @click="currentIndex = i"
         />
@@ -240,7 +240,7 @@ onUnmounted(() => {
           </p>
           <a
             class="bg-lime-200 rounded-2xl py-1 px-4 text-sm"
-            :href="img.largeurl.replace('http', 'https')"
+            :href="img.largeurl.replace('http://d.paper.i4.cn','/app4')"
             target="_blank"
           >
             下载此壁纸

@@ -12,4 +12,13 @@ export default defineConfig({
     },
   },
   base: "./",
+  server:{
+    proxy:{
+      '/app4':{
+        target:'http://d.paper.i4.cn',
+        changeOrigin:true,
+        rewrite:path=>path.replace(/^\/app4/,'')
+      }
+    }
+  }
 });
