@@ -22,7 +22,7 @@ type imgList = {
 const typeList = ref<tList[]>([]);
 
 const imagesList = ref<imgList[]>([]);
-const API_URL = "https://app4.i4.cn";
+const API_URL = "/app4";
 
 const p = ref(1);
 const remd = ref(1);

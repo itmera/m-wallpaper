@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/app4/:path*",
+            "destination": "https://d.paper.i4.cn/:path*"
+        }
+    ]
+}
