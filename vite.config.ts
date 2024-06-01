@@ -18,6 +18,11 @@ export default defineConfig({
         target:'http://d.paper.i4.cn',
         changeOrigin:true,
         rewrite:path=>path.replace(/^\/app4/,'')
+      },
+      '/api':{
+        target:'http://app4.i4.cn',
+        changeOrigin:true,
+        rewrite:path=>path.replace(/^\/api/,'')
       }
     }
   }

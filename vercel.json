@@ -3,6 +3,10 @@
         {
             "source": "/app4/:path*",
             "destination": "https://d.paper.i4.cn/:path*"
+        },
+        {
+            "source": "/api/:path*",
+            "destination": "https://app4.i4.cn/:path*"
         }
     ]
 }

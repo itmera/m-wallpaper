@@ -20,9 +20,7 @@ type imgList = {
   width: string;
 };
 const typeList = ref<tList[]>([]);
-
 const imagesList = ref<imgList[]>([]);
-const API_URL = "https://app4.i4.cn";
 
 const p = ref(1);
 const remd = ref(1);
@@ -33,7 +31,7 @@ const currentImage = ref<imgList | null>(null);
 const currentIndex = ref(0);
 
 const getTypeList = async () => {
-  const url = `${API_URL}/getWallpaperTypeList.xhtml`;
+  const url = `/api/getWallpaperTypeList.xhtml`;
   const res = await (await fetch(url)).json();
   if (res.success) {
     typeList.value = res.list;
@@ -41,7 +39,7 @@ const getTypeList = async () => {
 };
 
 const getImages = async (type: number = 0, p: number = 0, remd: number = 1) => {
-  const url = `${API_URL}/getWallpaperList.xhtml?typeid=${type}&remd=${remd}&model=iPhone12,5&pageno=${p}`;
+  const url = `/api/getWallpaperList.xhtml?typeid=${type}&remd=${remd}&model=iPhone12,5&pageno=${p}`;
   const res = await (await fetch(url)).json();
   if (res.success) {
     if (p == 1) {
@@ -55,6 +53,7 @@ const getImages = async (type: number = 0, p: number = 0, remd: number = 1) => {
 watch(currentIndex, (newIndex) => {
   currentImage.value = imagesList.value[newIndex];
 });
+
 watch([remd, typeId], () => {
   p.value = 1;
   leftTabShow.value = false;
