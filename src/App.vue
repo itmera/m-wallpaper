@@ -100,7 +100,7 @@ onUnmounted(() => {
     >
       <div class="relative h-full text-slate-300">
         <img
-          :src="currentImage.largeurl"
+          :src="currentImage.largeurl.replace('http://d.paper.i4.cn','/app4')"
           alt=""
           class="h-full object-scale-down object-center touch-pinch-zoom cursor-zoom-in"
         />
